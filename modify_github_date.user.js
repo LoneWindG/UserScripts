@@ -16,10 +16,9 @@ listenClick();
 
 function modifyGithubDate(){
     var relative_times = document.getElementsByTagName("relative-time");
-    console.log("[Github日期转换]relative_time count: " + relative_times.length);
+    console.log("[Github日期转换]相对时间标签数量: " + relative_times.length);
 
-    var now_year = new Date().getFullYear();
-    var now_time = Date.now();
+    var now = new Date();
     var title_formatter = new Intl.DateTimeFormat('zh-CN', { dateStyle:"full", timeStyle:"full", timeZone: "Asia/Shanghai" });
     var content_formatter0 = new Intl.DateTimeFormat('zh-CN', { dateStyle:"long", timeZone: "Asia/Shanghai" });
     var content_formatter1 = new Intl.DateTimeFormat('zh-CN', { month:"long", day:"numeric", timeZone: "Asia/Shanghai" });
@@ -36,11 +35,11 @@ function modifyGithubDate(){
         
         var content = item.shadowRoot.textContent;
         var always_relative_time = item.tense == "past";
-        if (date.getFullYear() != now_year)
+        if (date.getFullYear() != now.getFullYear())
         {
             if (always_relative_time)
             {
-                content = relative_time_formatter.format(date.getFullYear() - now_year, "year");
+                content = relative_time_formatter.format(date.getFullYear() - now.getFullYear(), "year");
             }
             else
             {
@@ -49,38 +48,53 @@ function modifyGithubDate(){
         }
         else
         {
-            var diff = (date.getTime() - now_time) / 1000;
-            if (diff < -30 * 24 * 60 * 60)
+            if (date.getMonth() != now.getMonth())
             {
                 if (always_relative_time)
                 {
-                    content = relative_time_formatter.format(Math.ceil(diff / (30 * 24 * 60 * 60)), "month");
+                    content = relative_time_formatter.format(date.getMonth() - now.getMonth(), "month");
                 }
                 else
                 {
                     content = content_formatter1.format(date);
                 }
             }
-            else if (diff < -24 * 60 * 60)
+            else if (date.getDate() != now.getDate())
             {
-                content = relative_time_formatter.format(Math.ceil(diff / (24 * 60 * 60)), "day");
+                var dayDiff = date.getDate() - now.getDate();
+                if (dayDiff < -5)
+                {
+                    var dateWeek = getWeek(date);
+                    var nowWeek = getWeek(now);
+                    content = relative_time_formatter.format(dateWeek - nowWeek, "week");
+                }
+                else 
+                { 
+                    content = relative_time_formatter.format(dayDiff, "day");
+                }
             }
-            else if (diff < -60 * 60)
+            else if (date.getHours() != now.getHours())
             {
-                content = relative_time_formatter.format(Math.ceil(diff / (60 * 60)), "hour");
+                content = relative_time_formatter.format(date.getHours() - now.getHours(), "hour");
             }
-            else if (diff < -60)
+            else if (date.getMinutes() != now.getMinutes())
             {
-                content = relative_time_formatter.format(Math.ceil(diff / 60), "minute");
+                content = relative_time_formatter.format(date.getMinutes() - now.getMinutes(), "minute");
             }
             else
             {
-                content = relative_time_formatter.format(diff, "second");
+                content = relative_time_formatter.format(date.getSeconds() - now.getSeconds(), "second");
             }
         }
 
         item.shadowRoot.textContent = content;
     }
+}
+
+function getWeek(date){
+    var weekDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    var firstWeekDayInLastMouth = (weekDay == 0 ? 7 : weekDay) - 1;
+    return Math.ceil((firstWeekDayInLastMouth + date.getDate()) / 7);
 }
 
 function listenClick(){
