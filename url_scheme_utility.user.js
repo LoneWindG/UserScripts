@@ -12,6 +12,8 @@
 // ==/UserScript==
 
 TryRegisterMsStoreAndXboxCmd();
+TryRegisterOpenInChromeCmd();
+
 //#region 在Chrome中打开
 
 //Chrome没有向Windows添加URL Protocol注册表, 所以此功能为自行添加注册表调用Chrome.exe启动
@@ -47,10 +49,38 @@ start chrome.exe %content%
 :end
 */
 
-GM_registerMenuCommand("在Chrome中打开", function(){
-    console.log("openinchrome://" + document.URL);
-    window.open("openinchrome://" + document.URL);
-}, 'c');
+function TryRegisterOpenInChromeCmd()
+{
+    var uaData = navigator.userAgentData;
+    if (uaData == null || uaData == undefined)
+    {
+        //部分浏览器不支持Navigator.userAgentData API, 此处使用ua字符串进行粗略判断
+        //https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgentData
+
+        //此方式依赖Windows注册表来调用chrome, 所以只支持Windows上使用
+        if (!navigator.userAgent.includes("Windows")) return;
+
+        //桌面浏览器应该只有Firefox不支持userAgentData, 所以此处应该只有Firefox会执行
+        if (!navigator.userAgent.includes("Firefox"))
+        {
+            console.log("[URL Scheme工具箱]检查到不兼容uaData的浏览器, UA:" + navigator.userAgent);
+            return;
+        }
+    }
+    else
+    {
+        //此方式依赖Windows注册表来调用chrome, 所以只支持Windows上使用
+        if (uaData.mobile || uaData.platform != "Windows") return;
+
+        var brands = uaData.brands;
+        if (brands.length <= 0 || brands[0].brand == "Google Chrome") return;
+    }
+
+    GM_registerMenuCommand("在Chrome中打开", function(){
+        console.log("openinchrome://" + document.URL);
+        window.open("openinchrome://" + document.URL);
+    }, 'c');
+}
 
 //#endregion
 
