@@ -78,7 +78,8 @@ function change(code)
         return;
     }
 
-    window.location.href = url.replace(urlRegion, code);
+    url = url.replace(urlRegion, code);
+    window.location.href = url;
 }
 
 function changeSpecialAppsUrl(url, code)
@@ -87,8 +88,20 @@ function changeSpecialAppsUrl(url, code)
     var gl = url.substring(glIndex, glIndex + 2).toUpperCase();
     var region = (code[3] + code[4]).toUpperCase();
     
-    var parmIndex = url.lastIndexOf("?hl=");
-    var hlIndex = parmIndex + "?hl=".length;
+    var parmStart = "?hl=";
+    var parmIndex = url.lastIndexOf(parmStart);
+    if (parmIndex == -1)
+    {
+        parmStart = "&hl=";
+        parmIndex = url.lastIndexOf(parmStart);
+        if (parmIndex == -1)
+        {
+            alert("识别URL中的语言地区参数失败, 无法切换");
+            return;
+        }
+    }
+
+    var hlIndex = parmIndex + parmStart.length;
     var hl = url.substring(hlIndex, hlIndex + 5).toLowerCase();
     code = code.toLowerCase();
 
@@ -113,7 +126,7 @@ function changeSpecialAppsUrl(url, code)
 
     hl = change_hl ? code : hl;
     gl = change_gl ? region : gl;
-    url = url.substring(0, parmIndex) + "?hl=" + hl + "&gl=" + gl;
+    url = url.substring(0, parmIndex) + parmStart + hl + "&gl=" + gl;
 
     window.location.href = url;
 }
