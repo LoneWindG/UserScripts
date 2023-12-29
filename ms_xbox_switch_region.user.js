@@ -12,7 +12,7 @@
 // @grant       GM_getValue
 // ==/UserScript==
 
-const builtin_regions = [ "[zh-CN]中国", "[zh-HK]香港", "[zh-TW]台湾", "[zh-SG]新加坡", "[en-US]美国" ];
+const builtin_regions = [ "[zh-CN]中国", "[zh-HK]香港", "[en-US]美国" ];
 registerRegions();
 
 function registerRegions()

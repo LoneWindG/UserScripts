@@ -91,17 +91,23 @@ function TryRegisterMsStoreAndXboxCmd()
     var productId = TryGetMsStoreProductId();
     if (productId == null || productId == undefined || productId == "") return;
 
+    var xboxUrl = "msxbox://game/?productId=" + productId;
+    GM_registerMenuCommand("在Xbox APP中打开", function(){
+        console.log(xboxUrl);
+        window.open(xboxUrl, '_self');
+    }, 'x');
+
     var storeUrl = "ms-windows-store://pdp/?productId=" + productId;
     GM_registerMenuCommand("在Microsoft Store中打开", function(){
         console.log(storeUrl);
         window.open(storeUrl, '_self');
     }, 's');
 
-    var xboxUrl = "msxbox://game/?productId=" + productId;
-    GM_registerMenuCommand("在Xbox APP中打开", function(){
-        console.log(xboxUrl);
-        window.open(xboxUrl, '_self');
-    }, 's');
+    var appsUrl = "https://apps.microsoft.com/detail/" + productId + "?hl=zh-cn";
+    GM_registerMenuCommand("在Apps Store中打开", function(){
+        console.log(appsUrl);
+        window.open(appsUrl);
+    }, 'a');
 }
 
 function TryGetMsStoreProductId()
