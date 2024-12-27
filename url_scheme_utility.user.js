@@ -1,10 +1,15 @@
 // ==UserScript==
 // @name         URL Scheme工具箱
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      2024-12-27
 // @description  提供部分URL Scheme快捷跳转功能
 // @author       Wind
-// @match        https://*/*
+// @match        https://www.microsoft.com/*
+// @match        https://www.xbox.com/*
+// @match        https://microsoft.com/*
+// @match        https://xbox.com/*
+// @match        https://keylol.com/t*
+// @match        https://store.epicgames.com/*
 // @icon         https://www.tampermonkey.net/favicon.ico
 // @run-at       document-start
 // @grant        GM_registerMenuCommand
@@ -77,8 +82,8 @@ function TryRegisterOpenInChromeCmd()
     }
 
     GM_registerMenuCommand("在Chrome中打开", function(){
-        console.log("openinchrome://" + document.URL);
-        window.open("openinchrome://" + document.URL);
+        console.log("openinchrome://" + window.location.href);
+        window.open("openinchrome://" + window.location.href);
     }, 'c');
 }
 
