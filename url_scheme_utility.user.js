@@ -4,6 +4,7 @@
 // @version      2025-05-07
 // @description  提供部分URL Scheme快捷跳转功能
 // @author       Wind
+// @match        https://*
 // @match        https://www.microsoft.com/*
 // @match        https://www.xbox.com/*
 // @match        https://microsoft.com/*
