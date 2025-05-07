@@ -42,9 +42,8 @@ Windows Registry Editor Version 5.00
 @set arg=%1
 @echo %arg%
 @set url_proto=%arg:~0,15%
-@echo %url_proto%
 @set base64=%arg:~15,-1%
-@echo %base64% > %TEMP%\\openinchrome.txt
+@echo %base64:_==% > %TEMP%\\openinchrome.txt
 @certutil -f -decode %TEMP%\\openinchrome.txt %TEMP%\\openinchrome_decode.txt
 @type %TEMP%\\openinchrome_decode.txt
 @set /p url=<%TEMP%\\openinchrome_decode.txt
@@ -86,7 +85,7 @@ function TryRegisterOpenInChromeCmd()
     }
 
     GM_registerMenuCommand("在Chrome中打开", function(){
-        var url = window.btoa(window.location.href);
+        var url = window.btoa(window.location.href).replaceAll('=', '_');
         console.log("openinchrome://" + url);
         window.open("openinchrome://" + url);
     }, 'c');
