@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         URL Scheme工具箱
 // @namespace    http://tampermonkey.net/
-// @version      2024-12-27
+// @version      2025-05-07
 // @description  提供部分URL Scheme快捷跳转功能
 // @author       Wind
 // @match        https://www.microsoft.com/*
@@ -42,14 +42,17 @@ Windows Registry Editor Version 5.00
 @echo %arg%
 @set url_proto=%arg:~0,15%
 @echo %url_proto%
-@set content=%arg:~15%
-@echo %content%
+@set base64=%arg:~15,-1%
+@echo %base64% > %TEMP%\\openinchrome.txt
+@certutil -f -decode %TEMP%\\openinchrome.txt %TEMP%\\openinchrome_decode.txt
+@type %TEMP%\\openinchrome_decode.txt
+@set /p url=<%TEMP%\\openinchrome_decode.txt
 @if not %url_proto% == openinchrome:// (
     @echo 协议不是openinchrome://, 参数:, %arg%
     @pause
     goto end
 )
-start chrome.exe %content%
+start chrome.exe %url%
 ::@pause
 :end
 */
@@ -82,8 +85,9 @@ function TryRegisterOpenInChromeCmd()
     }
 
     GM_registerMenuCommand("在Chrome中打开", function(){
-        console.log("openinchrome://" + window.location.href);
-        window.open("openinchrome://" + window.location.href);
+        var url = window.btoa(window.location.href);
+        console.log("openinchrome://" + url);
+        window.open("openinchrome://" + url);
     }, 'c');
 }
 
