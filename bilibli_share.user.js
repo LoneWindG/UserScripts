@@ -8,7 +8,7 @@
 // @match        https://service.weibo.com/share/share.php?url=*
 // @run-at       document-start
 // @grant        GM.setClipboard
-// @icon         https://i0.hdslb.com/bfs/static/jinkela/long/images/favicon.ico
+// @icon         https://www.bilibili.com/favicon.ico
 // ==/UserScript==
 
 copyBlibliShareUrl();
