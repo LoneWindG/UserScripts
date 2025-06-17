@@ -1,189 +1,148 @@
 // ==UserScript==
-// @name         Github的URL工具箱
+// @name         Github日期转换
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-07
-// @description  提供一些Github的URL快捷跳转或复制菜单
+// @version      2025-06-17
+// @description  将GitHub的日期显示转换为中文，规则尽量与GitHub一致
 // @author       Wind
 // @match        https://github.com/*
-// @icon         http://github.com/favicon.ico
-// @run-at       document-start
-// @grant        GM_registerMenuCommand
+// @grant        none
 // ==/UserScript==
 
-//路径组成
-//https://github.com/创建人/仓库名/blob/分支名/文件路径
-//https://raw.githubusercontent.com/创建人/仓库名/分支名/文件路径
+modifyGithubDate();
 
-// 这个页面是纯文本, 非HTML, 油猴无法注入, 暂不支持
-// @match        https://raw.githubusercontent.com/*
-verifyUrlAndRegisterMenu();
+function modifyGithubDate() {
+    'use strict';
 
-function getDomain(raw) {
-    return raw ? "https://raw.githubusercontent.com" : "https://github.com";
-}
+    console.log('[Github日期转换] 脚本已加载');
 
-function verifyUrlAndRegisterMenu() {
-    var url = window.location.href;
-    if (url.startsWith(getDomain(false))) {
-        tryRegisterMenu(false);
-    }
-    else if (url.startsWith(getDomain(true))) {
-        tryRegisterMenu(true);
-    }
-    else {
-        console.log("不是一个有效的github链接:" + url);
-    }
-}
+    var title_formatter = new Intl.DateTimeFormat('zh-CN', { dateStyle: "full", timeStyle: "full", timeZone: "Asia/Shanghai" });
+    var content_formatter0 = new Intl.DateTimeFormat('zh-CN', { dateStyle: "long", timeZone: "Asia/Shanghai" });
+    var content_formatter1 = new Intl.DateTimeFormat('zh-CN', { month: "long", day: "numeric", timeZone: "Asia/Shanghai" });
+    var relative_time_formatter = new Intl.RelativeTimeFormat('zh-CN', { numeric: "auto" });
 
+    // 英文到中文的映射
+    const map = [
+        { re: /^now$/i, zh: '刚刚' },
+        { re: /^just now$/i, zh: '刚刚' },
+        { re: /^(\d+)\s*seconds?\s*ago$/i, zh: '$1秒前' },
+        { re: /^(\d+)\s*minutes?\s*ago$/i, zh: '$1分钟前' },
+        { re: /^(\d+)\s*hours?\s*ago$/i, zh: '$1小时前' },
+        { re: /^yesterday$/i, zh: '昨天' },
+        { re: /^(\d+)\s*days?\s*ago$/i, zh: '$1天前' },
+        { re: /^last?\s*week$/i, zh: '上周' },
+        { re: /^(\d+)\s*weeks?\s*ago$/i, zh: '$1周前' },
+        { re: /^last?\s*month$/i, zh: '上个月' },
+        { re: /^(\d+)\s*months?\s*ago$/i, zh: '$1个月前' },
+        { re: /^last?\s*year$/i, zh: '去年' },
+        { re: /^(\d+)\s*years?\s*ago$/i, zh: '$1年前' },
+    ];
 
-function tryRegisterMenu(raw) {
-    var url = window.location.href;
-    var array = raw ? null : [];
-    var domain = getDomain(raw)
-    var sepCount = raw ? 4 : 5;
-    if (indexOfSeparator(url, domain.length, sepCount, array) !== sepCount) {
-        return;
-    }
-    //commit, tree, blob三种存储类型, 只有是blob是链接显示的是文件
-    if (!raw && url.substring(array[2] + 1, array[3]) !== "blob") {
-        return;
-    }
-    if (raw) {
-        GM_registerMenuCommand("跳转回Github", jumpRaw2RepositorieFile);
-        GM_registerMenuCommand("跳转回Github对应分支", jumpRaw2RepositorieBranch);
-        GM_registerMenuCommand("跳转回Github项目主页", jumpRaw2Repositorie);
-    }
-    else {
-        GM_registerMenuCommand("拷贝文件raw链接", copyRawFileLinkByRepositorie);
-        GM_registerMenuCommand("跳转文件raw链接", jumpRepositorieFile2Raw);
-    }
-}
-
-/**
- * 用于获取https:// 之后的/分隔符的出现次数, 如果array有效, 会把每个获取到的索引按顺序添加进去
- * @param {string} url 要查询的url字符串
- * @param {number} start 开始查询时的索引
- * @param {number} maxCount 最高统计次数, 统计结果达到该次数后会直接返回该值不再进行统计, 传入的值小于0会直接返回0, 等于0时会统计剩余部分的全部次数
- * @param {number[]} array 获取到的索引结果, 默认为null, 不会将结果添加进去
- * @param {number} count 统计开始时的次数, 传入的值小于0会直接返回0
- * @returns 统计到的分隔符次数或传入的最大次数
- */
-function indexOfSeparator(url, start, maxCount = 0, array = null, count = 0) {
-    if (maxCount < 0 || count < 0) {
-        return 0;
+    function en2zh(text) {
+        for (const { re, zh } of map) {
+            if (re.test(text)) {
+                // console.log(`[Github日期转换] 匹配到: "${text}" => "${text.replace(re, zh)}"`);
+                return text.replace(re, zh);
+            }
+        }
+        return null;
     }
 
-    var index = url.indexOf("/", start);
-    if (index < 0) {
-        return count;
+    function translateNode(node) {
+        if (!node || node.shadowRoot == null) return;
+
+        const content = node.shadowRoot.textContent;
+        if (content.startsWith('\u200b')) {
+            return;
+        }
+
+        var date = node.date;
+        var localeTime = title_formatter.format(date);
+        node.title = localeTime;
+        var newContent = en2zh(content);
+
+        var always_relative_time = node.tense == "past";
+        if (newContent === null) {
+            // newContent = formatDate(date);
+            newContent = formatDateZh(date, always_relative_time);
+            console.log(`[Github日期转换] 格式化日期: "${content}" => "${newContent}"`);
+        }
+        node.shadowRoot.textContent = "\u200b" + newContent;
     }
 
-    if (array) {
-        array.push(index);
-    }
-    count++;
-    if (maxCount > 0 && count >= maxCount) {
-        return count;
+    function formatDate(date) {
+        const now = new Date();
+        var content = "";
+        if (date.getFullYear() != now.getFullYear()) {
+            content = content_formatter0.format(date);
+        } else {
+            content = content_formatter1.format(date);
+        }
+        return content;
     }
 
-    return indexOfSeparator(url, index + 1, maxCount, array, count);
-}
-
-/**
- * 根据索引数组, 获取两两索引间的字符串, 并替换数组中的索引
- * @param {string} str
- * @param {Array} array
- */
-function substringReplaceIndex(str, array) {
-    for (let index = 0; index < array.length; index++) {
-        const start = array[index] + 1;
-        if (index + 1 == array.length) {
-            array[index] = str.substring(start);
+    function formatDateZh(date, always_relative_time) {
+        const now = new Date();
+        var content = "";
+        if (date.getFullYear() != now.getFullYear()) {
+            if (always_relative_time) {
+                content = relative_time_formatter.format(date.getFullYear() - now.getFullYear(), "year");
+            }
+            else {
+                content = content_formatter0.format(date);
+            }
         }
         else {
-            array[index] = str.substring(start, array[index + 1]);
+            if (date.getMonth() != now.getMonth()) {
+                if (always_relative_time) {
+                    content = relative_time_formatter.format(date.getMonth() - now.getMonth(), "month");
+                }
+                else {
+                    content = content_formatter1.format(date);
+                }
+            }
+            else if (date.getDate() != now.getDate()) {
+                var dayDiff = date.getDate() - now.getDate();
+                if (dayDiff < -5) {
+                    var dateWeek = getWeek(date);
+                    var nowWeek = getWeek(now);
+                    content = relative_time_formatter.format(dateWeek - nowWeek, "week");
+                }
+                else {
+                    content = relative_time_formatter.format(dayDiff, "day");
+                }
+            }
+            else if (date.getHours() != now.getHours()) {
+                content = relative_time_formatter.format(date.getHours() - now.getHours(), "hour");
+            }
+            else if (date.getMinutes() != now.getMinutes()) {
+                content = relative_time_formatter.format(date.getMinutes() - now.getMinutes(), "minute");
+            }
+            else {
+                content = relative_time_formatter.format(date.getSeconds() - now.getSeconds(), "second");
+            }
         }
-    }
-}
-
-function parseUrlInfo(raw) {
-    var url = window.location.href;
-    var array = [];
-
-    var domain = getDomain(raw);
-    var sepCount = raw ? 4 : 5;
-    if (indexOfSeparator(url, domain.length, sepCount, array) !== sepCount) {
-        return null;
-    }
-    substringReplaceIndex(url, array);
-    if (!raw && array[2] !== "blob") {
-        return null;
+        return content;
     }
 
-    var info = {
-        owner: array[0],
-        name: array[1],
-        branch: array[raw ? 2 : 3],
-        file: array[raw ? 3 : 4],
+    function getWeek(date) {
+        var weekDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        var firstWeekDayInLastMouth = (weekDay == 0 ? 7 : weekDay) - 1;
+        return Math.ceil((firstWeekDayInLastMouth + date.getDate()) / 7);
     }
-    return info;
-}
 
-//从文件raw的url跳转回仓库主分支
-function jumpRaw2Repositorie() {
-    var info = parseUrlInfo(true);
-    if (info) {
-        window.location.href = `${getDomain(false)}/${info.owner}/${info.name}`;
+    function modifyAll() {
+        const elements = document.querySelectorAll('relative-time');
+        if (elements.length === 0) {
+            return;
+        }
+        // console.log(`[Github日期转换] 检测到DOM变化，重新转换, ${elements.length}个待转换元素`);
+        elements.forEach(translateNode);
     }
-}
 
-//从文件raw的url跳转回仓库对应分支主页
-function jumpRaw2RepositorieBranch() {
-    var info = parseUrlInfo(true);
-    if (info) {
-        window.location.href = `${getDomain(false)}/${info.owner}/${info.name}/tree/${info.branch}`;
-    }
-}
+    // 初始转换
+    modifyAll();
 
-//从文件raw的url跳转回仓库对应该文件目录
-function jumpRaw2RepositorieFile() {
-    var info = parseUrlInfo(true);
-    if (info) {
-        window.location.href = `${getDomain(false)}/${info.owner}/${info.name}/blob/${info.branch}/${info.file}`;
-    }
-}
-
-//通过仓库文件的url生成raw对应的url, 并弹窗展示
-function copyRawFileLinkByRepositorie() {
-    var info = parseUrlInfo(false);
-    if (info) {
-        const url = `${getDomain(true)}/${info.owner}/${info.name}/${info.branch}/${info.file}`;
-        copyContent(url);
-    }
-}
-
-//从仓库文件的url跳转到raw对应的url(这个菜单其实没啥必要, 界面上都有了)
-function jumpRepositorieFile2Raw() {
-    var info = parseUrlInfo(false);
-    if (info) {
-        window.location.href = `${getDomain(true)}/${info.owner}/${info.name}/${info.branch}/${info.file}`;
-    }
-}
-
-function copyContent(content) {
-    let textarea = document.createElement('textarea');
-    try {
-        textarea.style = "width: 98%; height: 200px; user-select: auto;"
-        textarea.value = content;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-    }
-    catch (err) {
-        prompt("由于浏览器限制无法复制到剪切板, 请手动拷贝:", content);
-        console.error('拷贝失败: ', err);
-    }
-    finally {
-        textarea.remove();
-    }
+    // 监听 DOM 变化，动态转换
+    const observer = new MutationObserver(modifyAll);
+    observer.observe(document.body, { childList: true, subtree: true });
 }
