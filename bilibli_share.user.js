@@ -6,7 +6,7 @@
 // @author       Wind
 // @match        https://connect.qq.com/widget/shareqq/index.html?url=*
 // @match        https://service.weibo.com/share/share.php?url=*
-// @run-at       document-start
+// @run-at       document-body
 // @grant        GM.setClipboard
 // @icon         https://www.bilibili.com/favicon.ico
 // ==/UserScript==
