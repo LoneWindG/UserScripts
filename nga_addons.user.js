@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NGA 增强
 // @namespace    http://tampermonkey.net/
-// @version      2025-06-17
+// @version      2025-06-23
 // @description  *
 // @author       Wind
 // @match        https://bbs.nga.cn/*
@@ -11,7 +11,7 @@
 // @grant        GM_registerMenuCommand
 // ==/UserScript==
 
-GM_registerMenuCommand("分享链接", copyShareLink);
+GM_registerMenuCommand("分享链接", copyShareLink, 's');
 
 function copyShareLink() {
     if (!document.URL.startsWith("https://bbs.nga.cn/thread.php?fid=") && !document.URL.startsWith("https://bbs.nga.cn/read.php?tid=")) {
@@ -19,10 +19,10 @@ function copyShareLink() {
     }
     var subject = document.getElementById("postsubject0");
     if (subject === null){
-        copyContent(document.title + "\n" + document.URL);
+        copyContent(document.title.replace(" NGA玩家社区 P1", "") + "\n" + document.URL);
     }
     else {
-        copyContent(subject.innerText + " NGA玩家社区\n" + document.URL);
+        copyContent(subject.innerText + "\n" + document.URL);
     }
 }
 
