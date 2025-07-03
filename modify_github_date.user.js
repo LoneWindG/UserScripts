@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Github日期转换
 // @namespace    http://tampermonkey.net/
-// @version      2025-06-17
+// @version      2025-07-03
 // @description  将GitHub的日期显示转换为中文，规则尽量与GitHub一致
 // @author       Wind
 // @match        https://github.com/*
@@ -130,13 +130,37 @@ function modifyGithubDate() {
         return Math.ceil((firstWeekDayInLastMouth + date.getDate()) / 7);
     }
 
-    function modifyAll() {
-        const elements = document.querySelectorAll('relative-time');
-        if (elements.length === 0) {
+    function translateCommitTitle(node) {
+        var content = node.textContent;
+        if (content.startsWith('\u200b')) {
             return;
         }
-        // console.log(`[Github日期转换] 检测到DOM变化，重新转换, ${elements.length}个待转换元素`);
-        elements.forEach(translateNode);
+        const prefix = 'Commits on';
+        if (!content.startsWith(prefix)) {
+            return;
+        }
+        var contentDate = content.substring(prefix.length).trim();
+        var date;
+        try {
+            date = new Date(contentDate);
+        } catch (e) {
+            console.error(`[Github日期转换] 无法解析日期: "${node}"`, e);
+            return;
+        }
+        node.textContent = "\u200b提交于 " + content_formatter0.format(date);
+    }
+
+    function modifyAll() {
+        const elements = document.querySelectorAll('relative-time');
+        // console.log(`[Github日期转换] 检测到DOM变化，重新转换, ${elements.length}个待转换日期元素`);
+        if (elements.length !== 0) {
+            elements.forEach(translateNode);
+        }
+        const commitElements = document.querySelectorAll("h3[data-testid='commit-group-title']")
+        // console.log(`[Github日期转换] 检测到DOM变化，重新转换, ${commitElements.length}个待转换提交标题元素`);
+        if (commitElements.length !== 0) {
+            commitElements.forEach(translateCommitTitle);
+        }
     }
 
     // 初始转换
