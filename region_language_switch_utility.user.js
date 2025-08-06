@@ -26,8 +26,8 @@ verifyDomain();
 function verifyDomain() {
     var url = new URL(window.location.href);
     var domain = url.hostname;
-    console.log("当前域名: " + domain);
-    console.log("当前PathName: " + url.pathname);
+    // console.log("当前域名: " + domain);
+    // console.log("当前PathName: " + url.pathname);
     if (domain.endsWith("reddit.com")) {
         verifyRedditLanguage(url);
         return;
@@ -53,7 +53,7 @@ function verifyDomain() {
 function registerRegions(url, regionKey, changeMethod = null)
 {
     var currentCode = getCurrentCode(url);
-    console.log("当前地区代码: " + currentCode);
+    // console.log("当前地区代码: " + currentCode);
     if (currentCode === null || currentCode === undefined) {
         return;
     }
@@ -72,10 +72,10 @@ function registerRegions(url, regionKey, changeMethod = null)
         var codeStart = region.indexOf('[');
         var codeEnd = region.indexOf(']');
         var codeLength = codeEnd - codeStart - 1;
-        console.log("当前地区代码长度: " + codeLength);
-        console.log(codeLength !== 2 && codeLength !== 5);
-        console.log(codeLength === 5 && region[codeStart + 3] !== '-');
-        console.log(region[codeStart + 3]);
+        // console.log("当前地区代码长度: " + codeLength);
+        // console.log(codeLength !== 2 && codeLength !== 5);
+        // console.log(codeLength === 5 && region[codeStart + 3] !== '-');
+        // console.log(region[codeStart + 3]);
         if ((codeLength !== 2 && codeLength !== 5) || (codeLength === 5 && region[codeStart + 3] !== '-')) {
             console.log(`[网站地区&语言快捷切换工具] 菜单名称[${region}]无效, 无法获取有效的地区/语言代码`);
             continue;
@@ -84,8 +84,13 @@ function registerRegions(url, regionKey, changeMethod = null)
         if (code === currentCode) {
             continue;
         }
-        GM_registerMenuCommand(region, function() { changeMethod(code) });
+        GM_registerMenuCommand(region, createMenuCommand(code, changeMethod));
     }
+}
+
+function createMenuCommand(code, method)
+{
+    return function() { method(code);}
 }
 
 function getCurrentCode(url)
@@ -137,9 +142,9 @@ function changeReddit2zh() {
     if (params.has("show") && params.get("show") === "original") {
         params.delete("show");
     }
-    console.log(url.toString());
-    console.log(url.search);
-    console.log(params.toString());
+    // console.log(url.toString());
+    // console.log(url.search);
+    // console.log(params.toString());
     window.location.href = url.toString();
 }
 
@@ -175,8 +180,8 @@ function changeMsAppsUrl(code)
     params.set("hl", hl);
     params.set("gl", gl);
 
-    console.log(url.toString());
-    console.log(url.search);
-    console.log(params.toString());
+    // console.log(url.toString());
+    // console.log(url.search);
+    // console.log(params.toString());
     window.location.href = url.toString();
 }
