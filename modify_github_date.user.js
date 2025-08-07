@@ -5,6 +5,7 @@
 // @description  将GitHub的日期显示转换为中文，规则尽量与GitHub一致
 // @author       Wind
 // @match        https://github.com/*
+// @icon         http://github.com/favicon.ico
 // @grant        none
 // ==/UserScript==
 
@@ -26,7 +27,7 @@ function modifyGithubDate() {
 
     // 英文到中文的映射
     const map = [
-        { re: /^now$/i, zh: '刚刚' },
+        { re: /^now$/i, zh: '现在' },
         { re: /^just now$/i, zh: '刚刚' },
         { re: /^(\d+)\s*seconds?\s*ago$/i, zh: '$1秒前' },
         { re: /^(\d+)\s*minutes?\s*ago$/i, zh: '$1分钟前' },
