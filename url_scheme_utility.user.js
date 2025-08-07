@@ -4,13 +4,7 @@
 // @version      2025-08-07
 // @description  提供部分URL Scheme快捷跳转功能
 // @author       Wind
-// @match        https://*
-// @match        https://www.microsoft.com/*
-// @match        https://www.xbox.com/*
-// @match        https://microsoft.com/*
-// @match        https://xbox.com/*
-// @match        https://keylol.com/t*
-// @match        https://store.epicgames.com/*
+// @match        https://*/*
 // @icon         https://www.tampermonkey.net/favicon.ico
 // @run-at       document-start
 // @grant        GM_registerMenuCommand
@@ -102,7 +96,7 @@ function TryRegisterOpenInChromeCmd()
 function TryRegisterMsStoreAndXboxCmd()
 {
     var productId = TryGetMsStoreProductId();
-    if (productId == null || productId == undefined || productId == "") return;
+    if (productId === null || productId === undefined || productId == "") return;
 
     var xboxUrl = "msxbox://game/?productId=" + productId;
     GM_registerMenuCommand("在Xbox APP中打开", function(){
