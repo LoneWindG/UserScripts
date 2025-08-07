@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网站地区&语言快捷切换工具
 // @namespace    http://tampermonkey.net/
-// @version      2025-08-06
+// @version      2025-08-07
 // @description  快速切换部分网站的地区或语言
 // @author       Wind
 // @match        https://*.xbox.com/*
@@ -13,6 +13,10 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // ==/UserScript==
+
+if (window !== top) {
+    return;
+}
 
 function getBuiltinRegionMap() {
     return new Map([

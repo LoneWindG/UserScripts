@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         URL Scheme工具箱
 // @namespace    http://tampermonkey.net/
-// @version      2025-05-07
+// @version      2025-08-07
 // @description  提供部分URL Scheme快捷跳转功能
 // @author       Wind
 // @match        https://*
@@ -16,6 +16,10 @@
 // @grant        GM_registerMenuCommand
 // @grant        GM_openInTab
 // ==/UserScript==
+
+if (window !== top) {
+    return;
+}
 
 TryRegisterMsStoreAndXboxCmd();
 TryRegisterOpenInChromeCmd();

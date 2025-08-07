@@ -1,12 +1,16 @@
 // ==UserScript==
 // @name         Github日期转换
 // @namespace    http://tampermonkey.net/
-// @version      2025-07-03
+// @version      2025-08-07
 // @description  将GitHub的日期显示转换为中文，规则尽量与GitHub一致
 // @author       Wind
 // @match        https://github.com/*
 // @grant        none
 // ==/UserScript==
+
+if (window !== top) {
+    return;
+}
 
 modifyGithubDate();
 

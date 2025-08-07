@@ -1,14 +1,18 @@
 // ==UserScript==
 // @name         开发工具箱
 // @namespace    http://tampermonkey.net/
-// @version      2025-07-17
+// @version      2025-08-07
 // @description  一个简单的开发工具箱, 提供一些常用的开发功能
 // @author       Wind
-// @match        https://*/*
+// @match        https://*
 // @icon         data:image/webp;base64,UklGRkQCAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSEkAAAABR0A0gpl1n0wji7qICJWcGahpJKt6yRPxDECPFiokvJoKA+9jfQWQRPR/AmRngz5kVaNPb8MW1EnK+/ualAd1LmWrmKeyk/ApAFZQOCDUAQAAUAoAnQEqQABAAD7RYKVOqCWjIiYM6QAaCWoAybg08JMAA9XPTVd5pK/Q37YE4BBQmYJ5lOLfa492aUaT7/QXg1OwcMU+uUr4fmGCdZN6oujwS3idWqK0o8zk6AD8ZFUOoOxffzLFcNem9rec8X/9ZX//Mr//mV/tGbUQLFgK+DOvBvV5QlnYCMcSgq5TRyo7HWv8YJeBtahNHFTntfpt3DcWsTkwTMUWHOVQQn+0vjZdLVPftNTbY59qrfO5mtlmuFHlbABbOz0qs4ceNZ0KiRRPyZGBd/0rPn2Q+2GP96BgQDR6m1YM4QyFZ2aZCER95SNbhEqnrrqLY+GIvVJvs6cUATRAl5Ic5znT16s3uemOBncwr3dkSh+dHbY7b7iIaC8K2YJ5F93QEkdsOZTu7ZnE8LaMcx1mzePBFwBBA0RVj3SO21fHDiRDbvx71B0g0W8/jFz5jGgmBCzioa7EvEfXK7Sz4NqNtuS2JwhaBPBtBp7TuGPpZXcXlrTDdLM5pJBorl5k7YIxWtcCnOBksWD5QGojKc0FEmQr86E2d1gpY0u9/K6dxwwKQ5fbm6rbZ0VWTQeoubtemvG/NvH7OkLi/LGF1akn1Qi/AjawfzNgT4AA
 // @grant        GM_registerMenuCommand
 // @grant        GM.setClipboard
 // ==/UserScript==
+
+if (window !== top) {
+    return;
+}
 
 GM_registerMenuCommand("XOR加密", xorEncryptMenu);
 GM_registerMenuCommand("XOR解密", xorDecryptMenu);
