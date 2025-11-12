@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网站地区&语言快捷切换工具
 // @namespace    http://tampermonkey.net/
-// @version      2025-11-10
+// @version      2025-11-12
 // @description  快速切换部分网站的地区或语言
 // @author       Wind
 // @match        https://*.xbox.com/*
@@ -39,9 +39,11 @@ function verifyDomain() {
         return;
     }
     var regionKey;
+    var showAllCodes = false;
     var changeMethod = changeRegion;
     if (domain.endsWith("apps.microsoft.com")) {
         regionKey = "ms_regions";
+        showAllCodes = true;
         changeMethod = changeMsAppsUrl;
     }
     if (domain.endsWith("microsoft.com") || domain.endsWith("xbox.com")) {
@@ -58,17 +60,20 @@ function verifyDomain() {
         //console.log("[网站地区&语言快捷切换工具]未知域名: " + domain);
         return;
     }
-    registerRegions(url, regionKey, changeMethod);
+    registerRegions(url, regionKey, changeMethod, showAllCodes);
 }
 
-function registerRegions(url, regionKey, changeMethod = null)
+function registerRegions(url, regionKey, changeMethod, showAllCodes = false)
 {
-    var currentCode = getCurrentCode(url);
-    // console.log("[网站地区&语言快捷切换工具] 当前地区代码: " + currentCode);
-    if (currentCode === null || currentCode === undefined) {
-        return;
+    var currentCode = "";
+    if (!showAllCodes) {
+        currentCode = getCurrentCode(url);
+        if (currentCode === null || currentCode === undefined) {
+            console.log("[网站地区&语言快捷切换工具] 当前地区代码无效: " + currentCode);
+            return;
+        }
+        currentCode = currentCode.toLowerCase();
     }
-    currentCode = currentCode.toLowerCase();
 
     var regions = GM_getValue(regionKey, null);
     // console.log(`[网站地区&语言快捷切换工具] [${regionKey}]支持语言列表: ${regions}`);
@@ -179,12 +184,12 @@ function changeMsAppsUrl(code)
 {
     var url = new URL(window.location.href);
     var params = url.searchParams;
-    var gl = params.has("gl") ? params.get("gl").toLowerCase() : null;
-    var hl = params.has("hl") ? params.get("hl").toLowerCase() : null;
+    var gl = params.has("gl") ? params.get("gl") : null;
+    var hl = params.has("hl") ? params.get("hl") : null;
 
     var region = (code[3] + code[4]).toUpperCase();
-    var change_hl = hl !== code;
-    var change_gl = gl !== region;
+    var change_hl = hl.toLowerCase() !== code.toLowerCase();
+    var change_gl = gl.toUpperCase() !== region;
     if (!change_hl && !change_gl)
     {
         alert("已是该语言&地区, 无需切换");
@@ -193,8 +198,8 @@ function changeMsAppsUrl(code)
 
     if (change_hl && change_gl)
     {
-        change_hl = confirm("当前页面语言和地区可分开切换, 是否切换语言?");
-        change_gl = confirm("当前页面语言和地区可分开切换, 是否切换地区?");
+        change_hl = confirm("当前页面语言和地区可分开切换, 是否切换语言为[" + code + "]?");
+        change_gl = confirm("当前页面语言和地区可分开切换, 是否切换地区为[" + region + "]?");
         if (!change_hl && !change_gl)
         {
             alert("语言和地区切换均被取消, 未进行切换");
