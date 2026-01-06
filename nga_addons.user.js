@@ -9,7 +9,10 @@
 // @run-at       document-start
 // @grant        GM.setClipboard
 // @grant        GM_registerMenuCommand
+// @grant        GM_unregisterMenuCommand
 // @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
 // ==/UserScript==
 
 (function() {
@@ -18,7 +21,7 @@
     GM_registerMenuCommand("分享链接", copyShareLink, 's');
     GM_addStyle(`
         body > #mmc {
-            width: 75%;
+            width: 77%;
             margin: 0 auto !important;
         }
 
@@ -32,8 +35,37 @@
             margin-right: 10px;
         }
     `);
-
+    var show = GM_getValue("showToptopics", false);
+    if (show) {
+        showToptopics();
+    }else {
+        hideToptopics();
+    }
 })();
+
+function hideToptopics() {
+    var style = GM_addStyle(`
+        #toptopics span.postrow {
+            display: none !important;
+        }
+    `);
+    var commandId = 0;
+    commandId = GM_registerMenuCommand("显示版头", () => {
+        GM_setValue("showToptopics", true);
+        style.remove();
+        GM_unregisterMenuCommand(commandId);
+        showToptopics();
+    });
+}
+
+function showToptopics() {
+    var commandId = 0;
+    commandId = GM_registerMenuCommand("隐藏版头", () => {
+        GM_setValue("showToptopics", false);
+        GM_unregisterMenuCommand(commandId);
+        hideToptopics();
+    });
+}
 
 function copyShareLink() {
     if (!document.URL.startsWith("https://bbs.nga.cn/thread.php?fid=") && !document.URL.startsWith("https://bbs.nga.cn/read.php?tid=")) {

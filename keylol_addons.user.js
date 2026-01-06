@@ -47,6 +47,10 @@ function addBodyStyle(bobyId, minWidth) {
             min-width: ${minWidth};
         }
 
+        #${bobyId} > #wp > .index_middle_subject.clearfix > div {
+            min-width: 32%;
+        }
+
         #${bobyId} > .floatcontainer.doc_header.wp.cl {
             order: 2;
             min-width: ${minWidth};
