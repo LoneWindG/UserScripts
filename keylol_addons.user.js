@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Keylol 增强
 // @namespace    http://tampermonkey.net/
-// @version      2026-01-06
+// @version      2026-04-13
 // @description  其乐Keylol 论坛功能增强和自定义脚本
 // @author       Wind
 // @match        https://keylol.com/*
@@ -15,7 +15,7 @@
 
     GM_addStyle(`
         .index_navi_left { min-width: 720px !important; }
-        .bbs_top.frame.move-span.cl.frame-1-1 { min-height: 462px !important; }
+        .bbs_top.frame.move-span.cl.frame-1-1 { min-height: 465px !important; }
         .module.cl.xl.xl1 { min-height: 422px !important; }
     `);
     addBodyStyle("nv_forum", "1260px");
